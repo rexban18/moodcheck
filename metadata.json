@@ -1,0 +1,6 @@
+{
+  "name": "WinGo Game",
+  "description": "An interactive color prediction game (WinGo) inspired by TASHANWIN with 30s, 1m, 3m, and 5m game modes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
