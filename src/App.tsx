@@ -435,7 +435,7 @@ export default function App() {
   };
 
   // === GAME LOOP TIMER ===
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const startTimer = (mode: number, duration?: number) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -648,7 +648,7 @@ export default function App() {
 
   // Win auto-close countdown handler
   useEffect(() => {
-    let winTimerId: ReturnType<typeof setInterval>;
+    let winTimerId: NodeJS.Timeout;
     if (winNotification.show && winNotification.timer > 0) {
       winTimerId = setInterval(() => {
         setWinNotification((prev) => {
@@ -667,7 +667,7 @@ export default function App() {
 
   // Loss auto-close countdown handler
   useEffect(() => {
-    let lossTimerId: ReturnType<typeof setInterval>;
+    let lossTimerId: NodeJS.Timeout;
     if (lossNotification.show && lossNotification.timer > 0) {
       lossTimerId = setInterval(() => {
         setLossNotification((prev) => {
