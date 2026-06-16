@@ -56,7 +56,7 @@ export default function App() {
 
   // === ANNOUNCEMENT TIMELINE TEXT ===
   const announcements = [
-    "Welcome to yoloplay game platform! Enjoy fair and transparent results.",
+    "Welcome to TASHANWIN game platform! Enjoy fair and transparent results.",
     "System Notice: Play WinGo daily to earn extra cashback up to 5%!",
     "Attention: Please bind your verified account for automated secure transfers."
   ];
@@ -503,6 +503,26 @@ export default function App() {
   // === BET STATE & PLACEMENT ===
   const [currentBet, setCurrentBet] = useState<ActiveBet | null>(null);
 
+  // Custom Toast state
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: "success" | "error" | "info";
+  } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ show: true, message, type });
+    // Auto-dismiss after 2.5 seconds
+    setTimeout(() => {
+      setToast((prev) => {
+        if (prev && prev.message === message) {
+          return { ...prev, show: false };
+        }
+        return prev;
+      });
+    }, 2500);
+  };
+
   // Refs to avoid stale closures in setInterval callbacks
   const currentBetRef = useRef<ActiveBet | null>(null);
   const periodRef = useRef<string>(period);
@@ -560,7 +580,7 @@ export default function App() {
   const confirmBet = () => {
     const totalAmount = getCompactBetTotal();
     if (balance < totalAmount) {
-      alert("Insufficient Balance");
+      showToast("Insufficient Balance", "error");
       return;
     }
 
@@ -603,6 +623,7 @@ export default function App() {
     setMyBetList((prev) => [pendingBetItem, ...prev]);
 
     setBetModalOpen(false);
+    showToast("Bet Placed Successfully!", "success");
   };
 
   // === WIN/LOSS NOTIFICATION MODAL STATES ===
@@ -938,11 +959,11 @@ export default function App() {
     e.preventDefault();
     const parsed = parseFloat(depositValue);
     if (isNaN(parsed) || parsed <= 0) {
-      alert("Invalid Deposit Amount");
+      showToast("Invalid Deposit Amount", "error");
       return;
     }
     setBalance((prev) => prev + parsed);
-    alert(`Successfully deposited ₹${parsed.toFixed(2)} test chips!`);
+    showToast(`Successfully deposited ₹${parsed.toFixed(2)} test chips!`, "success");
     setDepositValue("");
     setDepositOpen(false);
   };
@@ -951,19 +972,19 @@ export default function App() {
     e.preventDefault();
     const parsed = parseFloat(withdrawValue);
     if (isNaN(parsed) || parsed <= 0) {
-      alert("Invalid Withdrawal Amount");
+      showToast("Invalid Withdrawal Amount", "error");
       return;
     }
     if (parsed > balance) {
-      alert("Insufficient wallet balance for this withdraw value");
+      showToast("Insufficient wallet balance for this withdraw value", "error");
       return;
     }
     if (!withdrawUpiId.trim()) {
-      alert("Please specify a valid withdrawal destination system");
+      showToast("Please specify a valid withdrawal destination system", "error");
       return;
     }
     setBalance((prev) => prev - parsed);
-    alert(`Withdrawal request of ₹${parsed.toFixed(2)} submitted successfully!`);
+    showToast(`Withdrawal request of ₹${parsed.toFixed(2)} submitted successfully!`, "success");
     setWithdrawValue("");
     setWithdrawUpiId("");
     setWithdrawOpen(false);
@@ -1457,13 +1478,6 @@ export default function App() {
                 Small (0-4)
               </button>
             </div>
-
-            {/* Print Active Pending Bet status trace */}
-            {currentBet && (
-              <div className="text-center p-2.5 bg-primary/20 text-text-light dark:text-text-dark rounded-lg text-xs font-semibold animate-pulse">
-                ⭐ Placed prediction: <span className="font-bold text-primary">{currentBet.value.toUpperCase()}</span> (₹{currentBet.totalAmount}) is active.
-              </div>
-            )}
           </div>
 
           {/* Bottom Interactive Panels Area */}
@@ -1784,11 +1798,11 @@ export default function App() {
               className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-300"
               onClick={() => setBetModalOpen(false)}
             ></div>
-            <div className="relative w-full max-w-sm bg-white dark:bg-gray-800 rounded-t-xl modal-slide-up overflow-hidden shadow-2xl transition-all duration-300 z-10">
+            <div className="relative w-full max-w-sm bg-[#162c1e] text-white rounded-t-2xl modal-slide-up overflow-hidden shadow-2xl transition-all duration-300 z-10">
               
               {/* Header color shifts in sync with choose type color */}
               <div
-                className={`p-3 transition-colors duration-150 text-white ${
+                className={`p-3.5 transition-colors duration-150 text-white ${
                   betModalState.color === "green"
                     ? "bg-emerald-500"
                     : betModalState.color === "violet"
@@ -1828,44 +1842,44 @@ export default function App() {
               </div>
 
               {/* Amount Unit Selectors */}
-              <div className="p-2">
-                <div className="grid grid-cols-4 gap-1.5" id="amountGrid">
+              <div className="p-2.5 mt-1.5">
+                <div className="grid grid-cols-4 gap-2" id="amountGrid">
                   {[1, 10, 100, 1000].map((val) => (
                     <button
                       key={val}
                       onClick={() => setBetModalState((prev) => ({ ...prev, amount: val }))}
-                      className={`py-1.5 rounded text-xs font-medium transition-all ${
+                      className={`py-1.5 rounded-lg text-xs font-bold transition-all ${
                         betModalState.amount === val
-                          ? "bg-primary text-black font-semibold"
-                          : "bg-gray-100 dark:bg-gray-700 text-text-light dark:text-text-dark hover:bg-gray-200 dark:hover:bg-gray-650"
+                          ? "bg-primary text-black font-extrabold shadow-md shadow-primary/20"
+                          : "bg-white/5 hover:bg-white/10 text-white"
                       }`}
                     >
-                      {val}
+                      ₹{val}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Quantity Incrementor */}
-              <div className="p-2 flex items-center justify-between">
-                <span className="text-xs text-gray-500 font-medium select-none">Quantity</span>
-                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
+              <div className="px-3 py-1 flex items-center justify-between">
+                <span className="text-xs text-gray-300 font-bold select-none">Quantity</span>
+                <div className="flex items-center bg-white/5 rounded-lg overflow-hidden border border-white/10">
                   <button
                     onClick={() =>
                       setBetModalState((prev) => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))
                     }
-                    className="px-3 py-1 text-lg font-bold hover:bg-black/10 dark:hover:bg-white/10 active:scale-90"
+                    className="px-4 py-1 text-lg font-black hover:bg-white/10 active:scale-90 text-white transition-colors"
                   >
                     -
                   </button>
-                  <span id="quantityValue" className="px-4 font-bold text-sm select-none">
+                  <span id="quantityValue" className="px-4 font-black text-sm text-white select-none">
                     {betModalState.quantity}
                   </span>
                   <button
                     onClick={() =>
                       setBetModalState((prev) => ({ ...prev, quantity: prev.quantity + 1 }))
                     }
-                    className="px-3 py-1 text-lg font-bold hover:bg-black/10 dark:hover:bg-white/10 active:scale-90"
+                    className="px-4 py-1 text-lg font-black hover:bg-white/10 active:scale-90 text-white transition-colors"
                   >
                     +
                   </button>
@@ -1873,15 +1887,15 @@ export default function App() {
               </div>
 
               {/* Modifiers Grid */}
-              <div className="p-2 grid grid-cols-6 gap-1" id="modalMultiplierGrid">
+              <div className="p-2.5 grid grid-cols-6 gap-1" id="modalMultiplierGrid">
                 {[1, 5, 10, 20, 50, 100].map((val) => (
                   <button
                     key={val}
                     onClick={() => setBetModalState((prev) => ({ ...prev, multiplier: val }))}
-                    className={`py-1 rounded text-[10px] transition-all ${
+                    className={`py-1 rounded-md text-[11px] font-bold transition-all ${
                       betModalState.multiplier === val
-                        ? "bg-green-500 text-white font-bold"
-                        : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-650"
+                        ? "bg-primary text-black font-extrabold shadow-md shadow-primary/20"
+                        : "bg-white/5 hover:bg-white/10 text-white"
                     }`}
                   >
                     X{val}
@@ -1890,26 +1904,26 @@ export default function App() {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-3 grid grid-cols-2 gap-2">
+              <div className="p-3.5 grid grid-cols-2 gap-2.5">
                 <button
                   onClick={() => setBetModalOpen(false)}
-                  className="bg-gray-200 dark:bg-gray-700 py-2.5 rounded font-bold text-xs hover:opacity-90 active:scale-95 transition-all text-text-light dark:text-text-dark"
+                  className="bg-white/10 py-2.5 rounded-lg font-extrabold text-xs hover:bg-white/15 active:scale-95 transition-all text-white"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmBet}
                   id="confirmBetBtn"
-                  className={`py-2.5 rounded font-bold text-white text-xs hover:shadow-lg active:scale-95 duration-100 transform text-center ${
+                  className={`py-2.5 rounded-lg font-extrabold text-white text-xs hover:shadow-lg active:scale-95 duration-100 transform text-center transition-all ${
                     betModalState.color === "green"
-                      ? "bg-emerald-600"
+                      ? "bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-500/30"
                       : betModalState.color === "violet"
-                      ? "bg-purple-600"
+                      ? "bg-purple-600 hover:bg-purple-500 shadow-md shadow-purple-500/30"
                       : betModalState.color === "red"
-                      ? "bg-red-600"
+                      ? "bg-red-600 hover:bg-red-500 shadow-md shadow-red-500/30"
                       : betModalState.color === "orange"
-                      ? "bg-orange-500"
-                      : "bg-blue-600"
+                      ? "bg-orange-500 hover:bg-orange-400 shadow-md shadow-orange-500/30"
+                      : "bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-500/30"
                   }`}
                 >
                   Confirm ₹{getCompactBetTotal().toFixed(2)}
@@ -1944,6 +1958,36 @@ export default function App() {
           drawnSize={lossNotification.drawnSize}
           timer={lossNotification.timer}
         />
+
+        {/* ================= CUSTOM TOAST NOTIFICATION ================= */}
+        {toast && toast.show && (
+          <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[200] w-[90%] max-w-xs animate-slide-down pointer-events-none">
+            <div className={`px-4 py-3 rounded-xl flex items-center justify-between gap-3 shadow-2xl border transition-all ${
+              toast.type === "success"
+                ? "bg-[#112211]/95 text-emerald-300 border-emerald-500/30 shadow-emerald-950/50"
+                : toast.type === "error"
+                ? "bg-[#221111]/95 text-red-300 border-red-500/30 shadow-red-950/50"
+                : "bg-[#111827]/95 text-blue-300 border-blue-500/30 shadow-blue-950/50"
+            }`}>
+              <div className="flex items-center gap-2.5">
+                {toast.type === "success" ? (
+                  <span className="material-icons text-emerald-400 text-lg">check_circle</span>
+                ) : toast.type === "error" ? (
+                  <span className="material-icons text-red-400 text-lg">error</span>
+                ) : (
+                  <span className="material-icons text-blue-400 text-lg">info</span>
+                )}
+                <span className="text-xs font-bold tracking-wide leading-tight text-white">{toast.message}</span>
+              </div>
+              <button 
+                onClick={() => setToast((prev) => prev ? { ...prev, show: false } : null)}
+                className="text-gray-400 hover:text-white pointer-events-auto flex items-center"
+              >
+                <span className="material-icons text-sm">close</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ================= DEPOSIT SIMULATION MODAL ================= */}
         {depositOpen && (
