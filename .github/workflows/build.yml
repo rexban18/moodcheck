@@ -23,26 +23,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Generate index.html
-        run: |
-          cd dist/client
-          CSS_FILES=$(ls assets/*.css 2>/dev/null)
-          JS_FILES=$(ls assets/*.js 2>/dev/null)
-          echo '<!DOCTYPE html>' > index.html
-          echo '<html lang="en">' >> index.html
-          echo '<head>' >> index.html
-          echo '  <meta charset="UTF-8" />' >> index.html
-          echo '  <meta name="viewport" content="width=device-width, initial-scale=1.0" />' >> index.html
-          echo '  <title>Tower Rush Tycoon</title>' >> index.html
-          for f in $CSS_FILES; do echo "  <link rel=\"stylesheet\" href=\"$f\" />" >> index.html; done
-          echo '</head>' >> index.html
-          echo '<body>' >> index.html
-          echo '  <div id="root"></div>' >> index.html
-          for f in $JS_FILES; do echo "  <script type=\"module\" src=\"$f\"></script>" >> index.html; done
-          echo '</body>' >> index.html
-          echo '</html>' >> index.html
-          echo "index.html generated successfully"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
